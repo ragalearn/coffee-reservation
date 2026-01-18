@@ -7,6 +7,8 @@ use App\Http\Controllers\Auth\VerifyOtpController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ReservationController as AdminReservationController;
+// Tambahkan Controller User Admin
+use App\Http\Controllers\Admin\UserController as AdminUserController; 
 use App\Http\Controllers\Pelanggan\ReservationController as PelangganReservationController;
 use App\Http\Controllers\Pelanggan\CategoryController as PelangganCategoryController;
 
@@ -71,7 +73,7 @@ Route::middleware(['auth', 'otp_verified'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | ADMIN (TIDAK BERUBAH)
+    | ADMIN
     |--------------------------------------------------------------------------
     */
     Route::middleware('role:admin')
@@ -82,8 +84,14 @@ Route::middleware(['auth', 'otp_verified'])->group(function () {
             Route::get('/dashboard', [DashboardController::class, 'index'])
                 ->name('dashboard');
 
+            // Manajemen Kategori
             Route::resource('categories', CategoryController::class);
 
+            // Manajemen User (BARU DITAMBAHKAN)
+            Route::get('/users', [AdminUserController::class, 'index'])
+                ->name('users.index');
+
+            // Manajemen Reservasi
             Route::get('/reservations', [AdminReservationController::class, 'index'])
                 ->name('reservations.index');
 
@@ -99,33 +107,17 @@ Route::middleware(['auth', 'otp_verified'])->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | PELANGGAN (UPDATE UNTUK KONSISTENSI FORM)
+    | PELANGGAN
     |--------------------------------------------------------------------------
     */
     Route::middleware('role:pelanggan')->group(function () {
-
-        Route::get('/categories', [PelangganCategoryController::class, 'index'])
-            ->name('categories.index');
-
-        Route::get('/categories/{category}', [PelangganCategoryController::class, 'show'])
-            ->name('categories.show');
-
-        // Alur Reservasi: Create -> Review -> Store
-        Route::get('reservations/create', [PelangganReservationController::class, 'create'])
-            ->name('reservations.create');
-
-        Route::post('reservations/review', [PelangganReservationController::class, 'review'])
-            ->name('reservations.review');
-
-        Route::post('reservations/store', [PelangganReservationController::class, 'store'])
-            ->name('reservations.store');
-
-        // Daftar Riwayat & Batalkan
-        Route::get('reservations', [PelangganReservationController::class, 'index'])
-            ->name('reservations.index');
-            
-        Route::delete('reservations/{reservation}', [PelangganReservationController::class, 'destroy'])
-            ->name('reservations.destroy');
+        Route::get('/categories', [PelangganCategoryController::class, 'index'])->name('categories.index');
+        Route::get('/categories/{category}', [PelangganCategoryController::class, 'show'])->name('categories.show');
+        Route::get('reservations/create', [PelangganReservationController::class, 'create'])->name('reservations.create');
+        Route::post('reservations/review', [PelangganReservationController::class, 'review'])->name('reservations.review');
+        Route::post('reservations/store', [PelangganReservationController::class, 'store'])->name('reservations.store');
+        Route::get('reservations', [PelangganReservationController::class, 'index'])->name('reservations.index');
+        Route::delete('reservations/{reservation}', [PelangganReservationController::class, 'destroy'])->name('reservations.destroy');
     });
 
     /*
@@ -133,19 +125,9 @@ Route::middleware(['auth', 'otp_verified'])->group(function () {
     | PROFILE
     |--------------------------------------------------------------------------
     */
-    Route::get('/profile', [ProfileController::class, 'edit'])
-        ->name('profile.edit');
-
-    Route::patch('/profile', [ProfileController::class, 'update'])
-        ->name('profile.update');
-
-    Route::delete('/profile', [ProfileController::class, 'destroy'])
-        ->name('profile.destroy');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-/*
-|--------------------------------------------------------------------------
-| AUTH DEFAULT
-|--------------------------------------------------------------------------
-*/
 require __DIR__ . '/auth.php';

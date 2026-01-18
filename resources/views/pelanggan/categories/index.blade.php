@@ -178,7 +178,8 @@
                 <span class="category-name">Outdoor</span>
                 <p class="category-desc">Fresh air and natural scenery for a more relaxed dining experience.</p>
                 <div class="capacity-badge">Capacity: 2–4 guests</div>
-                <a href="{{ route('reservations.create', ['category' => 'outdoor']) }}" class="btn-add">+</a>
+                {{-- PERUBAHAN DI SINI: Ganti 'outdoor' jadi 1 --}}
+                <a href="{{ route('reservations.create', ['category' => 1]) }}" class="btn-add">+</a>
             </div>
 
             <div class="category-card">
@@ -186,7 +187,8 @@
                 <span class="category-name">Indoor Area</span>
                 <p class="category-desc">Comfortable indoor seating with air conditioning, suitable for working and meetings.</p>
                 <div class="capacity-badge">Capacity: 4–6 guests</div>
-                <a href="{{ route('reservations.create', ['category' => 'indoor']) }}" class="btn-add">+</a>
+                {{-- PERUBAHAN DI SINI: Ganti 'indoor' jadi 2 --}}
+                <a href="{{ route('reservations.create', ['category' => 2]) }}" class="btn-add">+</a>
             </div>
 
             <div class="category-card">
@@ -194,7 +196,8 @@
                 <span class="category-name">Semi Outdoor</span>
                 <p class="category-desc">The best of both worlds, shaded but still enjoying the outside breeze.</p>
                 <div class="capacity-badge">Capacity: 4–6 guests</div>
-                <a href="{{ route('reservations.create', ['category' => 'semi-outdoor']) }}" class="btn-add">+</a>
+                {{-- PERUBAHAN DI SINI: Ganti 'semi-outdoor' jadi 3 --}}
+                <a href="{{ route('reservations.create', ['category' => 3]) }}" class="btn-add">+</a>
             </div>
         </div>
     </div>

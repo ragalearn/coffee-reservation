@@ -14,7 +14,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             CategorySeeder::class,
-            TableSeeder::class,
             ReservationSeeder::class, // optional (boleh dihapus jika tidak perlu)
         ]);
     }

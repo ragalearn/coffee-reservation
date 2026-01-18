@@ -10,8 +10,8 @@
                 {{-- ADMIN MENU --}}
                 @if (auth()->user()->role === 'admin')
                     <a href="{{ route('admin.dashboard') }}">Dashboard</a> |
+                    <a href="{{ route('admin.users.index') }}">Users</a> | {{-- MENU BARU --}}
                     <a href="{{ route('admin.categories.index') }}">Kategori</a> |
-                    <a href="{{ route('admin.tables.index') }}">Meja</a> |
                     <a href="{{ route('admin.reservations.index') }}">Reservasi</a>
                 @endif
 
