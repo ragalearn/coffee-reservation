@@ -9,18 +9,16 @@ use Illuminate\Http\Request;
 class ReservationController extends Controller
 {
     /**
-     * Display a listing of all reservations (with filter).
+     * List reservations (filterable)
      */
     public function index(Request $request)
     {
-        $query = Reservation::with(['user', 'table.category']);
+        $query = Reservation::with('user');
 
-        // 🔎 Filter status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // 📅 Filter tanggal
         if ($request->filled('date')) {
             $query->whereDate('reservation_date', $request->date);
         }
@@ -34,39 +32,24 @@ class ReservationController extends Controller
     }
 
     /**
-     * Display detail reservation.
+     * Show reservation detail
      */
     public function show(Reservation $reservation)
     {
-        $reservation->load(['user', 'table.category']);
+        $reservation->load('user');
 
         return view('admin.reservations.show', compact('reservation'));
     }
 
     /**
-     * Confirm a reservation.
+     * Confirm reservation
      */
     public function confirm(Reservation $reservation)
     {
-        // 🔐 Authorization via Policy (admin only)
         $this->authorize('process', Reservation::class);
 
-        // Cegah proses ulang
         if ($reservation->status !== 'pending') {
             return back()->withErrors('Reservasi sudah diproses');
-        }
-
-        // Cegah double booking (confirmed only)
-        $conflict = Reservation::where('table_id', $reservation->table_id)
-            ->where('reservation_date', $reservation->reservation_date)
-            ->where('reservation_time', $reservation->reservation_time)
-            ->where('status', 'confirmed')
-            ->exists();
-
-        if ($conflict) {
-            return back()->withErrors(
-                'Tidak bisa konfirmasi, meja sudah dikonfirmasi di waktu tersebut'
-            );
         }
 
         $reservation->update([
@@ -77,14 +60,12 @@ class ReservationController extends Controller
     }
 
     /**
-     * Reject a reservation.
+     * Reject reservation
      */
     public function reject(Reservation $reservation)
     {
-        // 🔐 Authorization via Policy (admin only)
         $this->authorize('process', Reservation::class);
 
-        // Cegah proses ulang
         if ($reservation->status !== 'pending') {
             return back()->withErrors('Reservasi sudah diproses');
         }

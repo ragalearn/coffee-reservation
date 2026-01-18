@@ -8,9 +8,7 @@
             <li><strong>Email:</strong> {{ $reservation->user->email }}</li>
             <li><strong>Tanggal:</strong> {{ $reservation->reservation_date }}</li>
             <li><strong>Waktu:</strong> {{ $reservation->reservation_time }}</li>
-            <li><strong>Meja:</strong> {{ $reservation->table->table_number }}</li>
-            <li><strong>Kategori:</strong> {{ $reservation->table->category->name }}</li>
-            <li><strong>Kapasitas Meja:</strong> {{ $reservation->table->capacity }}</li>
+            <li><strong>Seating Area:</strong> {{ $reservation->category->name }}</li>
             <li><strong>Jumlah Orang:</strong> {{ $reservation->people_count }}</li>
             <li><strong>Status:</strong> {{ ucfirst($reservation->status) }}</li>
         </ul>

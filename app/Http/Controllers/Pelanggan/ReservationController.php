@@ -4,113 +4,84 @@ namespace App\Http\Controllers\Pelanggan;
 
 use App\Http\Controllers\Controller;
 use App\Models\Reservation;
-use App\Models\Table;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class ReservationController extends Controller
 {
-    /**
-     * Tampilkan daftar reservasi milik user login.
-     */
     public function index()
     {
         $reservations = auth()->user()
             ->reservations()
-            ->with('table')
-            ->orderBy('reservation_date')
-            ->orderBy('reservation_time')
+            ->with('category')
+            ->orderBy('reservation_date', 'desc')
             ->get();
 
         return view('pelanggan.reservations.index', compact('reservations'));
     }
 
-    /**
-     * Form buat reservasi.
-     */
-    public function create()
+    public function create(Request $request)
     {
-        $tables = Table::where('status', 'available')->get();
+        $categoryId = $request->query('category');
+        $category = Category::find($categoryId);
 
-        return view('pelanggan.reservations.create', compact('tables'));
+        return view('pelanggan.reservations.create', compact('category'));
     }
 
-    /**
-     * Simpan reservasi baru.
-     */
-    public function store(Request $request)
+    // METHOD INI YANG TADI DILAPORKAN HILANG/ERROR
+    public function review(Request $request)
     {
-        $request->validate([
-            'table_id'         => 'required|exists:tables,id',
+        $validated = $request->validate([
+            'category_id'      => 'required|exists:categories,id',
+            'customer_name'    => 'required|string',
             'reservation_date' => 'required|date',
             'reservation_time' => 'required',
             'people_count'     => 'required|integer|min:1',
+            'phone_number'     => 'required|string',
+            'special_request'  => 'nullable|string',
         ]);
 
-        // 1️⃣ Tolak tanggal lampau
-        if (Carbon::parse($request->reservation_date)->isPast()) {
-            return back()->withErrors([
-                'reservation_date' => 'Tanggal reservasi tidak boleh di masa lalu'
-            ])->withInput();
-        }
+        $category = Category::find($validated['category_id']);
 
-        // 2️⃣ Jam operasional (09:00 - 22:00)
-        $time = Carbon::parse($request->reservation_time);
-        if ($time->hour < 9 || $time->hour >= 22) {
-            return back()->withErrors([
-                'reservation_time' => 'Reservasi hanya bisa antara jam 09:00 - 22:00'
-            ])->withInput();
-        }
+        return view('pelanggan.reservations.review', array_merge($validated, [
+            'category' => $category
+        ]));
+    }
 
-        $table = Table::findOrFail($request->table_id);
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'category_id'      => 'required|exists:categories,id',
+            'reservation_date' => 'required|date',
+            'reservation_time' => 'required',
+            'people_count'     => 'required|integer|min:1',
+            'phone_number'     => 'required|string',
+            'special_request'  => 'nullable|string',
+        ]);
 
-        // 3️⃣ Validasi kapasitas meja
-        if ($request->people_count > $table->capacity) {
-            return back()->withErrors([
-                'people_count' => 'Jumlah orang melebihi kapasitas meja'
-            ])->withInput();
-        }
-
-        // 4️⃣ Cek double booking
-        $conflict = Reservation::where('table_id', $table->id)
-            ->where('reservation_date', $request->reservation_date)
-            ->where('reservation_time', $request->reservation_time)
-            ->whereIn('status', ['pending', 'confirmed'])
-            ->exists();
-
-        if ($conflict) {
-            return back()->withErrors([
-                'reservation_time' => 'Meja sudah dipesan pada waktu tersebut'
-            ])->withInput();
-        }
-
-        // 5️⃣ Simpan reservasi
-        Reservation::create([
+        $reservation = Reservation::create([
             'user_id'          => auth()->id(),
-            'table_id'         => $table->id,
-            'reservation_date' => $request->reservation_date,
-            'reservation_time' => $request->reservation_time,
-            'people_count'     => $request->people_count,
+            'category_id'      => $validated['category_id'],
+            'reservation_date' => $validated['reservation_date'],
+            'reservation_time' => $validated['reservation_time'],
+            'people_count'     => $validated['people_count'],
+            'phone_number'     => $validated['phone_number'],
+            'special_request'  => $validated['special_request'],
             'status'           => 'pending',
         ]);
 
-        return redirect()
-            ->route('reservations.index')
-            ->with('success', 'Reservasi berhasil dibuat dan menunggu konfirmasi');
+        return view('pelanggan.reservations.confirmed', compact('reservation'));
     }
 
-    /**
-     * Batalkan reservasi (authorization via Policy).
-     */
     public function destroy(Reservation $reservation)
     {
-        // 🔐 Authorization via ReservationPolicy
-        $this->authorize('cancel', $reservation);
-
-        $reservation->update([
-            'status' => 'cancelled'
-        ]);
-
+        // Pastikan model Reservation memiliki relasi user
+        if ($reservation->user_id !== auth()->id()) {
+            abort(403);
+        }
+        
+        $reservation->update(['status' => 'cancelled']);
         return back()->with('success', 'Reservasi dibatalkan');
     }
 }

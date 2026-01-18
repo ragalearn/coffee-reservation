@@ -2,27 +2,33 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Reservation extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id',
-        'table_id',
+        'category_id',
         'reservation_date',
         'reservation_time',
         'people_count',
+        'phone_number',   
+        'special_request',
         'status',
-        'notes'
     ];
 
+    // Relasi ke User
     public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function table()
+    // Relasi ke Category (PENTING: Agar {{ $reservation->category->name }} tidak error)
+    public function category()
     {
-        return $this->belongsTo(Table::class);
+        return $this->belongsTo(Category::class);
     }
 }

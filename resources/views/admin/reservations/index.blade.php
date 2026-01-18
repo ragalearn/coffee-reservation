@@ -7,18 +7,10 @@
         <form method="GET" class="mb-4">
             <select name="status">
                 <option value="">-- Semua Status --</option>
-                <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>
-                    Pending
-                </option>
-                <option value="confirmed" {{ request('status') === 'confirmed' ? 'selected' : '' }}>
-                    Confirmed
-                </option>
-                <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>
-                    Rejected
-                </option>
-                <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>
-                    Cancelled
-                </option>
+                <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
+                <option value="confirmed" {{ request('status') === 'confirmed' ? 'selected' : '' }}>Confirmed</option>
+                <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
             </select>
 
             <input type="date" name="date" value="{{ request('date') }}">
@@ -32,7 +24,8 @@
                     <th>Tanggal</th>
                     <th>Waktu</th>
                     <th>Pelanggan</th>
-                    <th>Meja</th>
+                    <th>Seating Area</th>
+                    <th>Jumlah Orang</th>
                     <th>Status</th>
                     <th>Aksi</th>
                 </tr>
@@ -44,17 +37,15 @@
                         <td>{{ $reservation->reservation_date }}</td>
                         <td>{{ $reservation->reservation_time }}</td>
                         <td>{{ $reservation->user->name }}</td>
-                        <td>
-                            {{ $reservation->table->table_number }}
-                            ({{ $reservation->table->category->name }})
-                        </td>
+                        <td>{{ $reservation->category->name }}</td>
+                        <td>{{ $reservation->people_count }}</td>
                         <td>{{ ucfirst($reservation->status) }}</td>
                         <td>
                             <a href="{{ route('admin.reservations.show', $reservation) }}">
                                 Detail
                             </a>
 
-                            {{-- 🔐 AKSI ADMIN (Policy) --}}
+                            {{-- 🔐 AKSI ADMIN --}}
                             @can('process', App\Models\Reservation::class)
                                 @if ($reservation->status === 'pending')
                                     <form method="POST"
@@ -78,7 +69,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" style="text-align:center">
+                        <td colspan="7" style="text-align:center">
                             Tidak ada data reservasi
                         </td>
                     </tr>

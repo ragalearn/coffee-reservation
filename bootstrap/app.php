@@ -12,10 +12,27 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
 
-        // === REGISTER ROUTE MIDDLEWARE ===
+        /*
+        |--------------------------------------------------------------------------
+        | REGISTER ROUTE MIDDLEWARE
+        |--------------------------------------------------------------------------
+        */
         $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'role'         => \App\Http\Middleware\RoleMiddleware::class,
+            'otp_verified' => \App\Http\Middleware\EnsureOtpIsVerified::class,
         ]);
+
+        /*
+        |--------------------------------------------------------------------------
+        | AUTH REDIRECT PROTECTION
+        |--------------------------------------------------------------------------
+        | - Guest → /login
+        | - User login akses /login atau /register → /home
+        */
+        $middleware->redirectTo(
+            guests: '/login',
+            users: '/home'
+        );
 
     })
     ->withExceptions(function (Exceptions $exceptions): void {
