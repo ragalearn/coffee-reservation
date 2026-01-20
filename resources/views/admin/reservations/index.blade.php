@@ -1,105 +1,153 @@
-<x-app-layout>
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+@extends('layouts.app')
 
-            <h1 class="text-2xl font-bold text-gray-800 mb-6">Data Reservasi</h1>
+@section('content')
+<style>
+.admin-dashboard {
+    display: flex;
+    min-height: 100vh;
+    background: #f6f6f6;
+    font-family: 'Inter', sans-serif;
+}
 
-            {{-- FILTER SECTION --}}
-            <div class="bg-white p-4 rounded-lg shadow-sm mb-6">
-                <form method="GET" class="flex flex-wrap gap-4 items-end">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select name="status" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                            <option value="">-- Semua Status --</option>
-                            <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="confirmed" {{ request('status') === 'confirmed' ? 'selected' : '' }}>Confirmed</option>
-                            <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
-                            <option value="cancelled" {{ request('status') === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                        </select>
-                    </div>
+.main {
+    flex: 1;
+    padding: 32px 36px;
+}
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal</label>
-                        <input type="date" name="date" value="{{ request('date') }}" class="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                    </div>
+.header h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
 
-                    <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition">Filter</button>
-                </form>
-            </div>
+.card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 22px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.06);
+}
 
-            {{-- TABLE SECTION --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Waktu Reservasi</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Pelanggan</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Area / Jml Org</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Aksi</th>
-                            </tr>
-                        </thead>
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
 
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            @forelse ($reservations as $reservation)
-                                <tr>
-                                    <td class="px-6 py-4">
-                                        <div class="text-sm font-medium text-gray-900">{{ \Carbon\Carbon::parse($reservation->reservation_date)->format('d M Y') }}</div>
-                                        <div class="text-sm text-gray-500">{{ $reservation->reservation_time }}</div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="text-sm font-medium text-gray-900">{{ $reservation->user->name ?? 'User Terhapus' }}</div>
-                                        <div class="text-xs text-gray-500">{{ $reservation->phone_number }}</div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        <div class="text-sm text-gray-900">{{ $reservation->category->name ?? '-' }}</div>
-                                        <div class="text-xs text-gray-500">{{ $reservation->people_count }} Orang</div>
-                                    </td>
-                                    <td class="px-6 py-4">
-                                        @if($reservation->status == 'pending')
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
-                                        @elseif($reservation->status == 'confirmed')
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Confirmed</span>
-                                        @elseif($reservation->status == 'rejected')
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Rejected</span>
-                                        @else
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">{{ ucfirst($reservation->status) }}</span>
-                                        @endif
-                                    </td>
-                                    <td class="px-6 py-4 text-sm font-medium">
-                                        <div class="flex gap-2">
-                                            {{-- Detail --}}
-                                            <a href="{{ route('admin.reservations.show', $reservation) }}" class="text-blue-600 hover:text-blue-900 bg-blue-50 px-2 py-1 rounded text-xs">Detail</a>
+th {
+    font-size: 13px;
+    color: #777;
+    text-align: left;
+    padding-bottom: 12px;
+}
 
-                                            {{-- Tombol Aksi (Hanya muncul jika Pending) --}}
-                                            {{-- PENTING: @can SUDAH DIHAPUS AGAR TIDAK ERROR --}}
-                                            @if ($reservation->status === 'pending')
-                                                <form method="POST" action="{{ route('admin.reservations.confirm', $reservation) }}">
-                                                    @csrf @method('PATCH')
-                                                    <button type="submit" class="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700">Confirm</button>
-                                                </form>
+td {
+    padding: 14px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
 
-                                                <form method="POST" action="{{ route('admin.reservations.reject', $reservation) }}">
-                                                    @csrf @method('PATCH')
-                                                    <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700">Reject</button>
-                                                </form>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">
-                                        Tidak ada data reservasi
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+.status {
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+}
 
+.pending { background:#fff3cd; color:#856404; }
+.confirmed { background:#d4edda; color:#155724; }
+.rejected { background:#f8d7da; color:#721c24; }
+.cancelled { background:#e2e3e5; color:#383d41; }
+
+.actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn {
+    border: none;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-confirm { background:#28a745; color:#fff; }
+.btn-reject { background:#dc3545; color:#fff; }
+.btn-cancel { background:#6c757d; color:#fff; }
+.btn-delete { background:#343a40; color:#fff; }
+</style>
+
+<div class="admin-dashboard">
+    @include('admin.partials.sidebar')
+
+    <main class="main">
+        <div class="header">
+            <h1>Reservations</h1>
         </div>
-    </div>
-</x-app-layout>
+
+        <div class="card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Customer</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($reservations as $reservation)
+                    <tr>
+                        <td>#{{ $reservation->id }}</td>
+                        <td>{{ $reservation->user->name ?? '-' }}</td>
+                        <td>{{ $reservation->reservation_date }}</td>
+                        <td>{{ $reservation->reservation_time }}</td>
+                        <td>
+                            <span class="status {{ $reservation->status }}">
+                                {{ ucfirst($reservation->status) }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="actions">
+
+                                @if($reservation->status === 'pending')
+                                    <form method="POST" action="{{ route('admin.reservations.confirm', $reservation) }}">
+                                        @csrf @method('PATCH')
+                                        <button class="btn btn-confirm">Confirm</button>
+                                    </form>
+
+                                    <form method="POST" action="{{ route('admin.reservations.reject', $reservation) }}">
+                                        @csrf @method('PATCH')
+                                        <button class="btn btn-reject">Reject</button>
+                                    </form>
+                                @endif
+
+                                @if($reservation->status === 'confirmed')
+                                    <form method="POST" action="{{ route('admin.reservations.cancel', $reservation) }}">
+                                        @csrf @method('PATCH')
+                                        <button class="btn btn-cancel">Cancel</button>
+                                    </form>
+                                @endif
+
+                                {{-- 🔥 DELETE --}}
+                                <form method="POST"
+                                      action="{{ route('admin.reservations.destroy', $reservation) }}"
+                                      onsubmit="return confirm('Yakin ingin menghapus reservasi ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button class="btn btn-delete">Delete</button>
+                                </form>
+
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+
+    </main>
+</div>
+@endsection

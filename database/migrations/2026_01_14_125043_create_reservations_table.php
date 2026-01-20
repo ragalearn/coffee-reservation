@@ -6,41 +6,41 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('reservations', function (Blueprint $table) {
             $table->id();
 
+            // Relasi ke users
             $table->foreignId('user_id')
-                  ->constrained()
-                  ->cascadeOnDelete();
+                ->constrained()
+                ->cascadeOnDelete();
 
-            $table->foreignId('table_id')
-                  ->constrained()
-                  ->cascadeOnDelete();
+            // Relasi ke categories
+            $table->foreignId('category_id')
+                ->constrained()
+                ->cascadeOnDelete();
 
             $table->date('reservation_date');
             $table->time('reservation_time');
             $table->integer('people_count');
 
+            // ⬇️ INI YANG SEBELUMNYA HILANG
+            $table->string('phone_number')->nullable();
+            $table->text('special_request')->nullable();
+
             $table->enum('status', [
                 'pending',
                 'confirmed',
                 'rejected',
-                'cancelled'
+                'cancelled',
+                'completed'
             ])->default('pending');
 
-            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('reservations');

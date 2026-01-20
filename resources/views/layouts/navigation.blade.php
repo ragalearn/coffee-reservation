@@ -2,22 +2,17 @@
     <div class="flex justify-between">
 
         <div>
-            <strong>Coffee Reservation</strong>
+            @if (!request()->routeIs('reservations.create'))
+                <strong>Coffee Reservation</strong>
+            @endif
         </div>
+
 
         <div>
             @auth
-                {{-- ADMIN MENU --}}
-                @if (auth()->user()->role === 'admin')
-                    <a href="{{ route('admin.dashboard') }}">Dashboard</a> |
-                    <a href="{{ route('admin.users.index') }}">Users</a> | {{-- MENU BARU --}}
-                    <a href="{{ route('admin.categories.index') }}">Kategori</a> |
-                    <a href="{{ route('admin.reservations.index') }}">Reservasi</a>
-                @endif
-
-                {{-- PELANGGAN MENU --}}
                 @if (auth()->user()->role === 'pelanggan')
-                    <a href="{{ route('reservations.index') }}">Reservasi Saya</a>
+                    {{-- ENTRY POINT RESERVASI HARUS KE CATEGORY --}}
+                    <a href="{{ route('categories.index') }}">Reservasi</a>
                 @endif
 
                 |

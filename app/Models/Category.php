@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Category extends Model
 {
-    protected $fillable = ['name'];
+    use HasFactory;
 
-    public function tables()
-    {
-        return $this->hasMany(Table::class);
-    }
+    protected $fillable = [
+        'name',
+        'description',
+        'image',          
+        'min_capacity',
+        'max_capacity',
+    ];
 }

@@ -15,10 +15,16 @@ class Reservation extends Model
         'reservation_date',
         'reservation_time',
         'people_count',
-        'phone_number',   
+        'phone_number',
         'special_request',
         'status',
     ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | RELATIONS
+    |--------------------------------------------------------------------------
+    */
 
     // Relasi ke User
     public function user()
@@ -26,9 +32,30 @@ class Reservation extends Model
         return $this->belongsTo(User::class);
     }
 
-    // Relasi ke Category (PENTING: Agar {{ $reservation->category->name }} tidak error)
+    // Relasi ke Category
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | STATUS CHECKERS
+    |--------------------------------------------------------------------------
+    */
+
+    public function canBeConfirmed()
+    {
+        return $this->status === 'pending';
+    }
+
+    public function canBeRejected()
+    {
+        return $this->status === 'pending';
+    }
+
+    public function canBeCancelled()
+    {
+        return $this->status === 'confirmed';
     }
 }

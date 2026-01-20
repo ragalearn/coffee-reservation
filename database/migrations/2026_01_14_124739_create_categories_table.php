@@ -6,21 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            
+            // TAMBAHAN BARU (Wajib ada agar Seeder tidak error)
+            $table->text('description')->nullable(); // Untuk deskripsi suasana
+            $table->string('image')->nullable();     // Untuk foto kategori
+            
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('categories');

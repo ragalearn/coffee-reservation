@@ -6,6 +6,8 @@
     <title>Home - Maiway</title>
     <link href="https://fonts.googleapis.com/css?family=Inter:wght@400;700&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css?family=Instrument+Sans:wght@500;700&display=swap" rel="stylesheet" />
+    <link rel="icon" href="{{ asset('assets/img/logo.jpeg') }}" type="image/jpeg">
+    <link rel="shortcut icon" href="{{ asset('assets/img/logo.jpeg') }}" type="image/jpeg">
     
     <style>
         /* 1. RESET & BASE */

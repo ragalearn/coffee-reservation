@@ -31,13 +31,26 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:100',
-            'description' => 'nullable|string', // Tambahan: Supaya deskripsi bisa disimpan
+            'name'         => 'required|string|max:100',
+            'description'  => 'nullable|string',
+            'image'        => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'min_capacity' => 'required|integer|min:1',
+            'max_capacity' => 'required|integer|gte:min_capacity',
         ]);
 
+        // UPLOAD IMAGE (JIKA ADA)
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('categories', 'public');
+        } else {
+            $path = null;
+        }
+
         Category::create([
-            'name' => $request->name,
-            'description' => $request->description,
+            'name'         => $request->name,
+            'description'  => $request->description,
+            'image'        => $path,
+            'min_capacity' => $request->min_capacity,
+            'max_capacity' => $request->max_capacity,
         ]);
 
         return redirect()
@@ -59,14 +72,26 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         $request->validate([
-            'name' => 'required|string|max:100',
-            'description' => 'nullable|string',
+            'name'         => 'required|string|max:100',
+            'description'  => 'nullable|string',
+            'image'        => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+            'min_capacity' => 'required|integer|min:1',
+            'max_capacity' => 'required|integer|gte:min_capacity',
         ]);
 
-        $category->update([
-            'name' => $request->name,
-            'description' => $request->description,
+        $data = $request->only([
+            'name',
+            'description',
+            'min_capacity',
+            'max_capacity',
         ]);
+
+        // UPDATE IMAGE (JIKA ADA)
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('categories', 'public');
+        }
+
+        $category->update($data);
 
         return redirect()
             ->route('admin.categories.index')

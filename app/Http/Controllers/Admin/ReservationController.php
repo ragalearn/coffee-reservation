@@ -36,29 +36,26 @@ class ReservationController extends Controller
 
     public function confirm(Reservation $reservation)
     {
-        // HAPUS AUTHORIZE AGAR TIDAK ERROR 403
-        // $this->authorize('process', Reservation::class);
-
-        if ($reservation->status !== 'pending') {
-            return back()->withErrors('Reservasi sudah diproses');
-        }
-
         $reservation->update(['status' => 'confirmed']);
-
-        return back()->with('success', 'Reservasi berhasil dikonfirmasi');
+        return back()->with('success', 'Reservasi dikonfirmasi');
     }
 
     public function reject(Reservation $reservation)
     {
-        // HAPUS AUTHORIZE AGAR TIDAK ERROR 403
-        // $this->authorize('process', Reservation::class);
-
-        if ($reservation->status !== 'pending') {
-            return back()->withErrors('Reservasi sudah diproses');
-        }
-
         $reservation->update(['status' => 'rejected']);
+        return back()->with('success', 'Reservasi ditolak');
+    }
 
-        return back()->with('success', 'Reservasi berhasil ditolak');
+    public function cancel(Reservation $reservation)
+    {
+        $reservation->update(['status' => 'cancelled']);
+        return back()->with('success', 'Reservasi dibatalkan');
+    }
+
+    // 🔥 DELETE FINAL
+    public function destroy(Reservation $reservation)
+    {
+        $reservation->delete();
+        return back()->with('success', 'Reservasi berhasil dihapus');
     }
 }
